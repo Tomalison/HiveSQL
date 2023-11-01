@@ -70,3 +70,21 @@ select...
 - as 就是取別名 : 只能包含小寫字母、數字與下滑線，不可以下滑線開頭，不可以只包含數字； 如果有別名後，order by就要用別名
 
 ### 聚合函數
+``` sh
+- count() |返回column中的非NULL的行數|
+- sum() |返回column中所有值非NULL的求和結果|
+- avg() |返回column中所有值非NULL的平均值|
+- max() |返回column中所有值非NULL的最大值|
+- min() |返回column中所有值非NULL的最小值|
+- stddev |返回column中所有值非NULL的標準差|
+- variance() |返回column中所有值非NULL的變藝術| 
+```
+![image](https://github.com/Tomalison/HiveSQL/assets/96727036/17ee4039-cf69-480b-8a0d-aad34e7f5860)
+
+#### Group BY指定分組對象
+- 例如上圖範例，如果要比較'63'跟'65'這兩個城市，前面要先多city這個字段，select city  group by city;
+![image](https://github.com/Tomalison/HiveSQL/assets/96727036/fae7da37-b466-4b2b-8a42-95227bf002be)
+- gruop by是不能使用別名的，要用原本的
+
+#### DISTINCT與聚合函數的配合
+- 
