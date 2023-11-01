@@ -56,6 +56,6 @@ select...
 - order by 可對數據進行升序(預設)或降序(desc) ，後續要繼續排，後面也可以在加字段，這是一個全局的排序，會吃資源、耗效能 / 為了保證全局是有序的排列，這個任務的工作只會對應到一個map跟reduce，不會被打散到多個map中
 - distinct 排除重複，把一個字段內重複的值排除掉，只保留下唯一的 select distinct order_state, sale_channel from dw.dws_order_d; (範例是雙重去重)
   ![image](https://github.com/Tomalison/HiveSQL/assets/96727036/01f51efd-c813-493f-8c45-8be712b4055a)
-- where 搭配過濾的子句 比較運算(> , = , < , <> , <= , >=, != ) /(NOT) Between...And...介於..之間 /IN過濾...包含於... /模糊查詢:LIKE與通配符(%)...指定特定的**字符**做模糊匹配 /NULL過濾...(不)為空值 /多過濾條件組合
+- where 搭配過濾的子句 比較運算(> , = , < , <> , <= , >=, != ) /(NOT) Between...And...介於..之間(NOT不包含邊界值) /IN過濾...包含於... /模糊查詢:LIKE與通配符(%)...指定特定的**字符**做模糊匹配 /NULL過濾...(不)為空值 /多過濾條件組合
 
 
