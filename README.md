@@ -23,7 +23,78 @@ file:///C:/Users/tomsu/Downloads/02.%E5%A4%A7%E6%95%B8%E6%93%9A%E7%92%B0%E5%A2%8
 - 接著將這些CSV透過以下程式碼導入
 
 ``` sh
-AA
+create table dw.dws_mkt_act_d 
+(
+act_id            string    comment '活動id', 
+act_name          string    comment '活動名稱,例如新春好禮',
+act_start_time    timestamp comment '活動開始時間',
+act_end_time      timestamp comment '活動結束時間',
+ump_id            string    comment '優惠券id',
+ump_name          string    comment '優惠券名,例如無門檻50元優惠',
+ump_type          string    comment '優惠券類型,1=打折 2=滿減, 3=無門檻折抵',
+ump_state         string    comment '1生效 2强制失效(之前已领取的自动作废) 3已结束'
+)
+comment '行銷活動表'
+row format delimited fields terminated by ',' stored as  textfile
+tblproperties("skip.header.line.count"="1");
+
+
+create table dw.dim_city city_code 
+(
+city_code     string  comment '縣市代碼',
+city          string  comment '縣市名稱',
+area_code     string  comment '區里代碼',
+area          string  comment '區里名稱',
+village_code  string  comment '村里代碼',
+village       string  comment '村里名稱'
+)
+comment '城市維度表'
+row format delimited fields terminated by ',' stored as  textfile
+tblproperties("skip.header.line.count"="1");
+
+
+create table dw.dws_user_d
+(
+user_id         string      comment '用戶id',
+user_name       string      comment '用戶姓名',
+register_time   timestamp   comment '註冊時間',
+city            string      comment '城市id',
+age             string      comment '年齡區間',
+is_marry        int         comment '是否結婚,1=是 ,0=否',
+gender          string      comment '性別',
+mobile          string      comment '手機號'
+) 
+comment '用戶表,用戶id唯一'
+row format delimited fields terminated by ',' stored as  textfile
+tblproperties("skip.header.line.count"="1");
+; 
+
+
+create table dw.dws_order_d
+(
+order_id        string      comment '訂單id,30位數',
+valid_time      timestamp   comment '訂單生效時間',
+original_price  double      comment '原價',
+pay_amount      double      comment '支付金額',
+order_state     string      comment '訂單狀態, 5=支付成功',
+goods_type      string      comment '商品類型id',
+goods_id        string      comment '商品id',
+sale_channel    string      comment '銷售渠道(web官網,移動端官網,app商城)',
+pay_way         string      comment '支付方式(信用卡支付,第三方支付...)',
+is_return       string      comment '訂單是否退貨',
+order_mark      string      comment '訂單備註',
+ump_id          string      comment '優惠券id',
+user_id         string      comment '用戶id',
+city            string      comment '城市'
+)
+comment '訂單表,訂單id唯一'
+row format delimited fields terminated by ',' stored as  textfile
+tblproperties("skip.header.line.count"="1");
+
+load data inpath '/user/tomsu25478/dw.dws_mkt_act_d.csv' into table dw.dws_mkt_act_d;
+load data inpath '/user/tomsu25478/dim_city.csv' into table dw.dim_city;
+load data inpath '/user/tomsu25478/dw.dws_user_d.csv' into table dw.dws_user_d;
+load data inpath '/user/tomsu25478/dw.dws_order_d.csv' into table dw.dws_order_d;
 ```
 
 ### 認識數據模型
@@ -87,4 +158,66 @@ select...
 - gruop by是不能使用別名的，要用原本的
 
 #### DISTINCT與聚合函數的配合
-- 
+![image](https://github.com/Tomalison/HiveSQL/assets/96727036/3124e357-63e5-4e26-80a8-8602cd79b633)
+
+#### HAVING過濾分組後的數據
+- 經過聚合之後，再去篩選 就可以在gruop by後面加上having (分組後)
+![image](https://github.com/Tomalison/HiveSQL/assets/96727036/612e44d6-26de-4d0d-be6c-ffa2af13b282)
+- Having 也可以加上 or 雙條件吻合就可以一起叫出來
+![image](https://github.com/Tomalison/HiveSQL/assets/96727036/be998595-25b3-47dd-a9d9-9c5a20e9899b)
+
+#### HIVE語句的執行順序
+- Hive語句執行順序 : select...from...where...gruop by...having...order by...limit
+-  代碼的執行順序其實是 : from...where...group by...having...select...distinct...order by...limit
+- explain
+![image](https://github.com/Tomalison/HiveSQL/assets/96727036/8df660ad-512c-4a5e-a851-1ddd17daa2da)
+
+#### Group by去重
+- 在傳統SQL中，用group by的去重效能比distinc好，但在Hadoop不一定有差
+
+### 控制函數
+
+#### 認識Case When與If
+- 對控制函數分組、彙總函數與控制函數的結合、控制函數的判斷順序、多條件控制函數
+```sh
+CASE WHEN 條件1 THEN VALUE1
+     WHEN 條件2 THEN VALUE2
+     ----
+     WHEN 條件N THEN VALUEN
+   ELSE VALUE_UNKNOW
+   END
+```
+```sh
+SELECT
+  order_id,
+  city,
+  CASE WHEN city in ('10017','63','65','10003','10004') THEN '北區'
+       WHEN city in ('10015','66','10007','10008','10009') THEN '中區'
+       WHEN city in ('Chiayi','67','64','10013') THEN '南區'
+       ELSE '其他-東部或離島' 
+   END as city_group
+FROM dws_order_d；
+```
+```sh
+IF(條件1，VALUE1，VALUE_UNKNOW)
+如果條件表達式為TRUE，則返回"VALUE"，否則返回"VALUE_UNKNOW"
+
+SELECT IF(1=1,'YES','NO') AS C1,
+       IF(1=2,'YES','NO') AS C2,
+用法為
+IF(條件1,value1,
+ IF(條件2,value2,value_unknow)) 套嵌
+```
+```sh
+SELECT
+  order_id,
+  city,
+  IF (city in ('10017','63','65','10003','10004') , '北區',
+       IF (city in ('10015','66','10007','10008','10009') , '中區',
+       IF (city in ('Chiayi','67','64','10013') , '南區'
+       , '其他-東部或離島' )))
+   as city_group
+FROM dws_order_d；
+```
+
+
