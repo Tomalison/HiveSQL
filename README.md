@@ -178,7 +178,7 @@ select...
 ### 控制函數
 
 #### 認識Case When與If
-- 對控制函數分組、彙總函數與控制函數的結合、控制函數的判斷順序、多條件控制函數
+
 ```sh
 CASE WHEN 條件1 THEN VALUE1
      WHEN 條件2 THEN VALUE2
@@ -219,5 +219,70 @@ SELECT
    as city_group
 FROM dws_order_d；
 ```
+- 對控制函數分組 : group by要取別名之前的字段，或取別名之前的表達式
+```sh
+SELECT
+  IF (city in ('10017','63','65','10003','10004') , '北區',
+       IF (city in ('10015','66','10007','10008','10009') , '中區',
+       IF (city in ('Chiayi','67','64','10013') , '南區'
+       , '其他-東部或離島' )))
+   as city_group,
+  count(order_id) as order_cou
+FROM dws_order_d
+GROUP BY  IF (city in ('10017','63','65','10003','10004') , '北區',
+       IF (city in ('10015','66','10007','10008','10009') , '中區',
+       IF (city in ('Chiayi','67','64','10013') , '南區'
+       , '其他-東部或離島' )))；
+```
+![image](https://github.com/Tomalison/HiveSQL/assets/96727036/284f2a9a-a373-47bc-bd58-8ea92559f56c)
 
+- 彙總函數與控制函數的結合
+```sh
+SELECT
+  count(IF (city in ('10017','63','65','10003','10004') ,order_id,null)) as order_cou_north
+FROM dws_order_d
+以此類推
+``` 
+- 控制函數的判斷順序
+ ![image](https://github.com/Tomalison/HiveSQL/assets/96727036/df7da8ca-d57a-4006-9f29-7d6e81b5ba79)
+以上圖範例，65映射到北區，即使你查詢的字段滿足多個條件，但是case when 跟 if 他滿足條件是從最前面開始，當滿足條件之後，他不會館後面條件是否滿足，除非不滿足才會往下判斷下去。
+
+### 用函數高校處理數據
+#### 常用數值處理函數
+#### 常用時間處理函數
+#### 常用字段串處理函數
+### 煩人的數據缺失與極端值
+#### 評估數據質量
+#### 缺失值對聚合函數及算數運算的影響
+#### 缺失值的處理
+#### 查找極端值
+### 子查詢
+#### FROM子查詢
+#### WHERE子查詢
+### 實現多表查詢，利用JOIN實現表的橫向連結
+#### 認識4種JOIN
+#### JOIN語句
+#### LEFT JOIN與RIGHT JOIN語句
+#### FULL JOIN語句
+### 實現多表查詢，利用UNION實現表的縱向連結
+#### UNION與UNION ALL
+#### UNION的廠警 : 指標管理
+### 改變表的結構:行列互轉
+#### 字段折上去
+#### 字段折下來
+### 強大的窗口函數
+#### 了解甚麼是窗口函數
+#### 用row_number()給流水號
+#### 用LEAD()查詢往下第n行
+### 庫、表的操作
+#### 數據庫的操作
+#### 方便分析的臨時表
+#### 標準的建表語句
+#### 追加新數據
+#### 導入CSV數據
+### 手把手一起寫LEETCODE SQL題(HARD)
+#### LEETCODE DATABASE題簡介
+- EXERCISE1:185.DEOARTMENT TOP THREE SALARIES
+- EXERCISE2:262.TRIPS AND USERS
+- EXERCISE3:601.HUMAN TRAFFIC OF STADIUM
 
